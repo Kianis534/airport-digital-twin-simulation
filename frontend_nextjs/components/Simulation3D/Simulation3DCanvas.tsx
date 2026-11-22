@@ -1,177 +1,256 @@
 "use client";
 
-import React, { useMemo, Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Sky, Stars, Environment, useGLTF, Html } from '@react-three/drei';
-import * as THREE from 'three';
-import { Maximize2, Loader2 } from 'lucide-react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { Canvas, addAfterEffect, addEffect, useThree } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, Stars } from '@react-three/drei';
+import { Maximize2 } from 'lucide-react';
 import { useSimulation } from '@/context/SimulationContext';
-import { asset } from '@/lib/site';
-import Passenger from './Passenger';
+import Aircraft from './Aircraft';
+import Crowd from './Crowd';
 import Infrastructure from './Infrastructure';
 
-const LoadingState = () => (
-  <Html center>
-    <div className="flex flex-col items-center gap-3 bg-white/90 backdrop-blur-md px-8 py-4 rounded-3xl shadow-2xl border border-white/20">
-      <Loader2 className="w-8 h-8 text-brand-600 animate-spin" />
-      <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest whitespace-nowrap">Loading Assets...</p>
-    </div>
-  </Html>
-);
+export interface Scene3DProps {
+  /** True while the scene is on screen (inside the 3D Twin page). */
+  active: boolean;
+  /** performance.now() when the 3D Twin page attached the scene, or null when hidden. */
+  openedAt: number | null;
+}
 
-const Aircraft = ({ isFlying, isPlaneReady }: { isFlying: boolean, isPlaneReady: boolean }) => {
-  const { scene } = useGLTF(asset('/models/airplane.glb'));
-  const meshRef = React.useRef<THREE.Group>(null);
-  const [takeoffStarted, setTakeoffStarted] = React.useState(false);
+export interface RenderStats {
+  /** Scene mount → first rendered frame: renderer, scene build, shader compile, first draw (ms). */
+  initMs: number | null;
+  /** 3D Twin page opened → first frame rendered on screen (ms). */
+  openMs: number | null;
+  /** Frames per second, from the interval between rendered frames (capped by the display). */
+  fps: number;
+  /** CPU time per frame for scene updates and render submission, averaged over 60 frames (ms). */
+  workMs: number;
+  drawCalls: number;
+  triangles: number;
+}
 
-  const clonedScene = useMemo(() => scene.clone(), [scene]);
-
-  useFrame(() => {
-    if (!meshRef.current) return;
-
-    if (isFlying) {
-      if (!takeoffStarted) {
-        // Start takeoff from the runway position (X: 70)
-        meshRef.current.position.set(70, 0.5, 0);
-        meshRef.current.rotation.set(0, Math.PI / 2, 0); 
-        setTakeoffStarted(true);
-      }
-
-      // Movement: Straight away from user (-Z direction)
-      meshRef.current.position.z -= 0.8;
-      const distanceTraveled = Math.abs(meshRef.current.position.z);
-
-      if (distanceTraveled > 40) {
-        meshRef.current.position.y += 0.15;
-        // Pitch up for -Z movement involves rotating the X axis
-        meshRef.current.rotation.x = Math.max(meshRef.current.rotation.x - 0.005, -0.25);
-      }
-    } else if (isPlaneReady) {
-      setTakeoffStarted(false);
-      // PARKED ON RUNWAY: Aligned with runway center (X: 70)
-      meshRef.current.position.set(70, 0.5, 0);
-      
-      // ROTATED 180 DEGREES
-      meshRef.current.rotation.set(0, Math.PI / 2, 0); 
-      meshRef.current.rotation.x = 0;
-    } else {
-      setTakeoffStarted(false);
-      meshRef.current.position.set(300, 0, 0);
-    }
-  });
-
-  return (
-    <primitive 
-      ref={meshRef} 
-      object={clonedScene} 
-      scale={0.012} 
-    />
-  );
+/** Tiny external store so updating the overlay never re-renders the 3D scene. */
+const statsStore = {
+  value: null as RenderStats | null,
+  listeners: new Set<() => void>(),
+  set(next: RenderStats) {
+    statsStore.value = next;
+    statsStore.listeners.forEach((l) => l());
+  },
+  subscribe(listener: () => void) {
+    statsStore.listeners.add(listener);
+    return () => statsStore.listeners.delete(listener);
+  },
 };
 
-const Moon = ({ position }: { position: [number, number, number] }) => (
-  <group position={position}>
-    <mesh>
-      <sphereGeometry args={[15, 32, 32]} />
-      <meshStandardMaterial 
-        color="#fefce8" 
-        emissive="#fefce8" 
-        emissiveIntensity={4} 
-      />
-    </mesh>
-    <pointLight intensity={200} distance={500} color="#fefce8" />
-  </group>
-);
+const useRenderStats = () => useSyncExternalStore(statsStore.subscribe, () => statsStore.value, () => null);
 
-const Simulation3DCanvas = () => {
+/** Reads timings from the renderer itself (no estimates). */
+function RenderProbe({ mountedAt, openedAt, onFirstFrame }: { mountedAt: number; openedAt: number | null; onFirstFrame: () => void }) {
+  const gl = useThree((state) => state.gl);
+  const opened = useRef(openedAt);
+  const openMeasured = useRef<number | null>(null);
+
+  useEffect(() => {
+    opened.current = openedAt;
+    if (openedAt !== null) openMeasured.current = null;
+  }, [openedAt]);
+
+  useEffect(() => {
+    let initMs: number | null = null;
+    let frameStart = 0;
+    let last = 0;
+    let lastReport = 0;
+    const intervals: number[] = [];
+    const work: number[] = [];
+    const push = (list: number[], v: number) => {
+      list.push(v);
+      if (list.length > 60) list.shift();
+    };
+    const mean = (list: number[]) => list.reduce((a, b) => a + b, 0) / list.length;
+    const report = (now: number) => {
+      lastReport = now;
+      statsStore.set({
+        initMs,
+        openMs: openMeasured.current,
+        fps: intervals.length > 5 ? 1000 / mean(intervals) : 0,
+        workMs: work.length ? mean(work) : 0,
+        drawCalls: gl.info.render.calls,
+        triangles: gl.info.render.triangles,
+      });
+    };
+
+    const offBefore = addEffect(() => {
+      frameStart = performance.now();
+    });
+    const offAfter = addAfterEffect(() => {
+      const now = performance.now();
+      if (initMs === null) {
+        initMs = now - mountedAt;
+        performance.mark('aerotwin:3d-first-frame');
+        onFirstFrame();
+      } else if (now - last < 250) {
+        // Skip the gap while the loop was paused in the background.
+        push(intervals, now - last);
+        push(work, now - frameStart);
+      }
+      if (opened.current !== null && openMeasured.current === null) {
+        openMeasured.current = now - opened.current;
+        performance.mark('aerotwin:3d-open-frame');
+        report(now);
+      }
+      last = now;
+      if (lastReport === 0 || now - lastReport > 500) report(now);
+    });
+    return () => {
+      offBefore();
+      offAfter();
+    };
+  }, [gl, mountedAt, onFirstFrame]);
+
+  return null;
+}
+
+/**
+ * Compile every shader program in parallel (KHR_parallel_shader_compile) before the first
+ * frame. Otherwise WebGL compiles programs one after another inside the first render, which
+ * on Windows (ANGLE → Direct3D) dominated start-up time.
+ */
+function Precompile({ onReady }: { onReady: () => void }) {
+  const { gl, scene, camera } = useThree();
+  useLayoutEffect(() => {
+    let alive = true;
+    const done = () => alive && onReady();
+    if (typeof gl.compileAsync === 'function') void gl.compileAsync(scene, camera).then(done, done);
+    else {
+      gl.compile(scene, camera);
+      done();
+    }
+    return () => {
+      alive = false;
+    };
+  }, [gl, scene, camera, onReady]);
+  return null;
+}
+
+function StatsOverlay() {
+  const stats = useRenderStats();
+  return (
+    <div
+      className="pointer-events-none absolute bottom-5 right-5 rounded-2xl border border-white/40 bg-slate-900/80 px-4 py-3 font-mono text-[11px] leading-relaxed text-slate-200 shadow-lg backdrop-blur"
+      data-testid="render-stats"
+      data-open-ms={stats?.openMs?.toFixed(1)}
+      data-init-ms={stats?.initMs?.toFixed(1)}
+      data-work-ms={stats?.workMs.toFixed(2)}
+      data-fps={stats?.fps.toFixed(1)}
+      data-draw-calls={stats?.drawCalls}
+    >
+      {stats ? (
+        <>
+          <p>
+            opened in <span className="font-bold text-emerald-300">{stats.openMs !== null ? `${stats.openMs.toFixed(0)} ms` : '…'}</span>
+            {stats.initMs !== null && <span className="text-slate-400"> · scene set up in {stats.initMs.toFixed(0)} ms</span>}
+          </p>
+          <p>{stats.fps > 0 ? `${stats.fps.toFixed(0)} fps · ${stats.workMs.toFixed(1)} ms work/frame` : 'measuring frame time…'}</p>
+          <p>
+            {stats.drawCalls} draw calls · {(stats.triangles / 1000).toFixed(1)}k tris
+          </p>
+        </>
+      ) : (
+        <p>starting renderer…</p>
+      )}
+    </div>
+  );
+}
+
+export default function Simulation3DCanvas({ active, openedAt }: Scene3DProps) {
   const { passengers, isFlying, isPlaneReady, simParams } = useSimulation();
-  const containerRef = React.useRef<HTMLDivElement>(null);
-
-  const isNight = simParams.time_of_day < 6 || simParams.time_of_day > 18;
-
-  const sunPosition = useMemo(() => [180, 70, -120], []);
-  const moonPosition = useMemo(() => [-180, 70, -120], []);
-
-  const ambientIntensity = useMemo(() => {
-    if (!isNight) return 0.8; // Increased for brighter day
-    return 0.05;
-  }, [isNight]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [mountedAt] = useState(() => performance.now());
+  const [compiled, setCompiled] = useState(false);
+  const [warmFrameDone, setWarmFrameDone] = useState(false);
+  const markCompiled = useCallback(() => setCompiled(true), []);
+  const markFirstFrame = useCallback(() => setWarmFrameDone(true), []);
+  const night = simParams.time_of_day < 6 || simParams.time_of_day > 18;
+  // Render continuously while on screen; off screen, render one warm-up frame and then stop.
+  const running = compiled && (active || !warmFrameDone);
 
   const toggleFullScreen = () => {
-    if (!containerRef.current) return;
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().catch((err) => {
-        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-      });
-    } else {
-      document.exitFullscreen();
-    }
+    const el = containerRef.current;
+    if (!el) return;
+    if (!document.fullscreenElement) void el.requestFullscreen().catch(() => undefined);
+    else void document.exitFullscreen();
   };
 
   return (
-    <div ref={containerRef} className="w-full h-[600px] bg-slate-100 rounded-[2.5rem] overflow-hidden shadow-inner relative border border-slate-200">
-      <Canvas shadows gl={{ preserveDrawingBuffer: true }}>
-        <PerspectiveCamera makeDefault position={[-100, 60, 100]} fov={45} />
-        <OrbitControls 
-          enableDamping 
-          dampingFactor={0.05}
-          maxPolarAngle={Math.PI / 2.1} 
-          minDistance={20}
-          maxDistance={200}
+    <div
+      ref={containerRef}
+      className={`relative h-[560px] w-full overflow-hidden rounded-3xl border border-slate-200 shadow-inner transition-colors duration-700 ${
+        night ? 'bg-gradient-to-b from-[#020617] via-[#1e1b4b] to-[#312e81]' : 'bg-gradient-to-b from-[#7dd3fc] via-[#bae6fd] to-[#f0f9ff]'
+      }`}
+    >
+      {/* The sky is a CSS gradient behind a transparent canvas: no sky shader to compile or run. */}
+      <Canvas
+        shadows="percentage"
+        dpr={[1, 1.75]}
+        frameloop={running ? 'always' : 'never'}
+        // Measure the container immediately; the default 50 ms debounce delayed start-up.
+        resize={{ scroll: true, debounce: { scroll: 0, resize: 0 } }}
+        gl={{ antialias: true, alpha: true }}
+      >
+        <PerspectiveCamera makeDefault position={[-100, 60, 100]} fov={45} near={1} far={1500} />
+        <OrbitControls enableDamping dampingFactor={0.05} maxPolarAngle={Math.PI / 2.1} minDistance={20} maxDistance={220} />
+        {night && <Stars radius={300} depth={60} count={3000} factor={6} saturation={0} fade speed={1} />}
+
+        {/* Fixed light rig (no point lights): day/night only changes intensities, never the shaders. */}
+        <hemisphereLight args={['#e0f2fe', '#14532d', night ? 0.25 : 1.1]} />
+        <ambientLight intensity={night ? 0.15 : 0.35} />
+        <directionalLight
+          position={[120, 140, -80]}
+          intensity={night ? 0.25 : 1.6}
+          color={night ? '#c7d2fe' : '#fffbeb'}
+          castShadow
+          shadow-mapSize={[2048, 2048]}
+          shadow-camera-left={-160}
+          shadow-camera-right={160}
+          shadow-camera-top={160}
+          shadow-camera-bottom={-160}
+          shadow-camera-far={500}
+          shadow-bias={-0.0005}
         />
-        
-        <Suspense fallback={<LoadingState />}>
-          <Sky 
-            sunPosition={sunPosition as [number, number, number]} 
-            turbidity={isNight ? 10 : 0.1} // Clearer sky for day
-            rayleigh={isNight ? 0.5 : 2}    // Better blue scattering
-            mieCoefficient={0.005}
-            mieDirectionalG={0.8}
-          />
-          {isNight && (
-            <Moon position={moonPosition as [number, number, number]} />
-          )}
-          
-          <Stars radius={100} depth={50} count={5000} factor={isNight ? 6 : 0} saturation={0} fade speed={1} />
-          <Environment preset={isNight ? "night" : "city"} />
-          <ambientLight intensity={ambientIntensity} />
-          <directionalLight 
-            position={sunPosition as [number, number, number]} 
-            intensity={isNight ? 0.01 : 1.2} 
-            castShadow={!isNight}
-            color={isNight ? "#1e1b4b" : "#fffbeb"}
-          />
 
-          <Infrastructure />
-          <Aircraft isFlying={isFlying} isPlaneReady={isPlaneReady} />
-
-          {passengers.map((p) => (
-            <Passenger 
-              key={p.id} 
-              id={p.id} 
-              type={p.type} 
-              activeStage={p.stage} 
-              slotIndex={p.slotIndex}
-            />
-          ))}
-        </Suspense>
+        <Infrastructure />
+        <Aircraft isFlying={isFlying} isPlaneReady={isPlaneReady} />
+        <Crowd />
+        <RenderProbe mountedAt={mountedAt} openedAt={openedAt} onFirstFrame={markFirstFrame} />
+        <Precompile onReady={markCompiled} />
       </Canvas>
 
-      <button 
+      <button
+        type="button"
         onClick={toggleFullScreen}
-        className="absolute top-8 right-8 p-3 bg-white/80 backdrop-blur-md rounded-xl border border-white/20 shadow-lg hover:bg-white transition-colors pointer-events-auto group z-10"
+        className="absolute right-5 top-5 z-10 rounded-xl border border-white/30 bg-white/85 p-2.5 text-slate-600 shadow-md backdrop-blur hover:text-brand-700"
+        aria-label="Toggle full screen"
       >
-        <Maximize2 className="w-5 h-5 text-slate-600 group-hover:text-brand-600 transition-colors" />
+        <Maximize2 className="h-5 w-5" />
       </button>
 
-      <div className="absolute bottom-8 left-8 p-6 bg-white/80 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl pointer-events-none">
-        <div className="space-y-1">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Entities</p>
-          <p className="text-2xl font-black text-slate-900 tracking-tight">{passengers.length} Passengers</p>
+      <div className="pointer-events-none absolute bottom-5 left-5 rounded-2xl border border-white/40 bg-white/85 px-4 py-3 shadow-lg backdrop-blur">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">In the terminal</p>
+        <p className="text-xl font-extrabold tracking-tight text-slate-900">{passengers.length} passengers</p>
+        <div className="mt-1 flex gap-3 text-[11px] text-slate-500">
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-blue-600" />
+            domestic
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-violet-600" />
+            international
+          </span>
         </div>
       </div>
+
+      <StatsOverlay />
     </div>
   );
-};
-
-export default Simulation3DCanvas;
+}

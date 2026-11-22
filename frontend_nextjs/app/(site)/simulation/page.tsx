@@ -2,22 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import { ArrowRight, Info } from 'lucide-react';
 import AIAdvisorPanel from '@/components/AIAdvisorPanel';
 import ControlPanel from '@/components/Simulation3D/ControlPanel';
+import { Scene3DSlot } from '@/components/Simulation3D/Persistent3D';
+// Imported here so a direct visit downloads the 3D code with the page (no extra round trip).
+import '@/components/Simulation3D/Simulation3DCanvas';
 import SimulationDashboard from '@/components/SimulationDashboard';
 import { PageHeader } from '@/components/ui';
-
-const Simulation3DCanvas = dynamic(() => import('@/components/Simulation3D/Simulation3DCanvas'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-[560px] w-full flex-col items-center justify-center gap-3 rounded-3xl bg-slate-100">
-      <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-600 border-t-transparent" />
-      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Loading the 3D terminal…</p>
-    </div>
-  ),
-});
 
 export default function SimulationPage() {
   return (
@@ -28,7 +20,7 @@ export default function SimulationPage() {
       </PageHeader>
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <Simulation3DCanvas />
+        <Scene3DSlot className="h-[560px] w-full" />
         <ControlPanel />
       </div>
 

@@ -77,7 +77,7 @@ The demo is a static site on GitHub Pages, so nothing needs to be installed. Sce
 | Page | What you can do |
 | --- | --- |
 | [Scenario Lab](https://kianis534.github.io/airport-digital-twin-simulation/what-if/) | Move staffing, traffic, weather and seasonal demand. Compare against the baseline. Presets are shareable, e.g. `?preset=lane-closure`. |
-| [3D Twin](https://kianis534.github.io/airport-digital-twin-simulation/simulation/) | A real-time Three.js terminal where passengers walk the process and aircraft board and take off. |
+| [3D Twin](https://kianis534.github.io/airport-digital-twin-simulation/simulation/) | A real-time Three.js terminal where passengers walk the process and aircraft board and take off. No model downloads; opened from another page it shows its first frame in roughly 60–70 ms and renders each frame in about 2 ms. The corner overlay shows these timings, measured live. |
 | [Analytics](https://kianis534.github.io/airport-digital-twin-simulation/graphs-stats/) | Seven live charts that follow the 3D view. |
 | [Models](https://kianis534.github.io/airport-digital-twin-simulation/models/) | Test-set metrics, baselines, feature importance and the LSTM backtest. |
 | [Architecture](https://kianis534.github.io/airport-digital-twin-simulation/overview/) | Layers, process model and API endpoints. |

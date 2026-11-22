@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FlaskConical, Menu, PlaneTakeoff, X } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
+import { Persistent3DHost } from '@/components/Simulation3D/Persistent3D';
 import { GithubIcon } from '@/components/ui';
 import { site } from '@/lib/site';
 import { cn } from '@/lib/utils';
@@ -103,6 +104,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       </header>
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 md:py-16">{children}</main>
+      <Persistent3DHost />
 
       <footer className="border-t border-slate-200/70 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 md:flex-row md:items-center md:justify-between">
