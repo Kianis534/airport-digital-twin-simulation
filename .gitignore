@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual environments and secrets
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# Data pipeline outputs (regenerate with `python -m preprocessing.pipeline`)
+outputs/
+datasets/raw/
+
+# Model artifacts: only the portable, shipped files are tracked
+ml_models/artifacts/*
+!ml_models/artifacts/satisfaction_model.ubj
+!ml_models/artifacts/satisfaction_model.meta.json
+!ml_models/artifacts/satisfaction_surface.json
+!ml_models/artifacts/delay_distribution.json
+!ml_models/artifacts/traffic_forecast.json
+!ml_models/artifacts/traffic_lstm.keras
+*.pkl
+*.joblib
+*.h5
+
+# Frontend
+frontend_nextjs/node_modules/
+frontend_nextjs/.next/
+frontend_nextjs/out/
+frontend_nextjs/next-env.d.ts
+frontend_nextjs/*.tsbuildinfo
+node_modules/
+
+# Local tooling
+.preview/
+.idea/
+.vscode/
+*.log
+.DS_Store
+Thumbs.db

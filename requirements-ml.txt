@@ -1,0 +1,4 @@
+# Model training (adds TensorFlow for the LSTM forecaster). TensorFlow supports Python 3.10-3.12.
+-r requirements.txt
+tensorflow>=2.16,<2.21
+matplotlib>=3.8
