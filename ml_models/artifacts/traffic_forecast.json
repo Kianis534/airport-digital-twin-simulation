@@ -1,0 +1,750 @@
+{
+  "model": "LSTM (64 -> 32 units)",
+  "airport": "SFO",
+  "trained_at": "2026-11-21T23:10:12+00:00",
+  "tensorflow_version": "2.20.0",
+  "look_back_months": 12,
+  "test_months": 24,
+  "epochs_run": 93,
+  "train_seconds": 24.14,
+  "metrics": {
+    "lstm": {
+      "mae": 173905.2,
+      "rmse": 199924.9,
+      "mape": 4.24
+    },
+    "seasonal_naive": {
+      "mae": 217923.7,
+      "rmse": 231873.0,
+      "mape": 5.3
+    }
+  },
+  "history": [
+    {
+      "month": "2005-07",
+      "passengers": 3225769
+    },
+    {
+      "month": "2005-08",
+      "passengers": 3195866
+    },
+    {
+      "month": "2005-09",
+      "passengers": 2740553
+    },
+    {
+      "month": "2005-10",
+      "passengers": 2770715
+    },
+    {
+      "month": "2005-11",
+      "passengers": 2617333
+    },
+    {
+      "month": "2005-12",
+      "passengers": 2671797
+    },
+    {
+      "month": "2006-01",
+      "passengers": 2448889
+    },
+    {
+      "month": "2006-02",
+      "passengers": 2223024
+    },
+    {
+      "month": "2006-03",
+      "passengers": 2708778
+    },
+    {
+      "month": "2006-04",
+      "passengers": 2773293
+    },
+    {
+      "month": "2006-05",
+      "passengers": 2829000
+    },
+    {
+      "month": "2006-06",
+      "passengers": 3071396
+    },
+    {
+      "month": "2006-07",
+      "passengers": 3227605
+    },
+    {
+      "month": "2006-08",
+      "passengers": 3143839
+    },
+    {
+      "month": "2006-09",
+      "passengers": 2720100
+    },
+    {
+      "month": "2006-10",
+      "passengers": 2834959
+    },
+    {
+      "month": "2006-11",
+      "passengers": 2653887
+    },
+    {
+      "month": "2006-12",
+      "passengers": 2698200
+    },
+    {
+      "month": "2007-01",
+      "passengers": 2507430
+    },
+    {
+      "month": "2007-02",
+      "passengers": 2304990
+    },
+    {
+      "month": "2007-03",
+      "passengers": 2820085
+    },
+    {
+      "month": "2007-04",
+      "passengers": 2869247
+    },
+    {
+      "month": "2007-05",
+      "passengers": 3056934
+    },
+    {
+      "month": "2007-06",
+      "passengers": 3263621
+    },
+    {
+      "month": "2007-07",
+      "passengers": 3382382
+    },
+    {
+      "month": "2007-08",
+      "passengers": 3436417
+    },
+    {
+      "month": "2007-09",
+      "passengers": 2957530
+    },
+    {
+      "month": "2007-10",
+      "passengers": 3129309
+    },
+    {
+      "month": "2007-11",
+      "passengers": 2922500
+    },
+    {
+      "month": "2007-12",
+      "passengers": 2903637
+    },
+    {
+      "month": "2008-01",
+      "passengers": 2670053
+    },
+    {
+      "month": "2008-02",
+      "passengers": 2595676
+    },
+    {
+      "month": "2008-03",
+      "passengers": 3127387
+    },
+    {
+      "month": "2008-04",
+      "passengers": 3029021
+    },
+    {
+      "month": "2008-05",
+      "passengers": 3305954
+    },
+    {
+      "month": "2008-06",
+      "passengers": 3453751
+    },
+    {
+      "month": "2008-07",
+      "passengers": 3603946
+    },
+    {
+      "month": "2008-08",
+      "passengers": 3612297
+    },
+    {
+      "month": "2008-09",
+      "passengers": 3004720
+    },
+    {
+      "month": "2008-10",
+      "passengers": 3124451
+    },
+    {
+      "month": "2008-11",
+      "passengers": 2744485
+    },
+    {
+      "month": "2008-12",
+      "passengers": 2962937
+    },
+    {
+      "month": "2009-01",
+      "passengers": 2644539
+    },
+    {
+      "month": "2009-02",
+      "passengers": 2359800
+    },
+    {
+      "month": "2009-03",
+      "passengers": 2925918
+    },
+    {
+      "month": "2009-04",
+      "passengers": 3024973
+    },
+    {
+      "month": "2009-05",
+      "passengers": 3177100
+    },
+    {
+      "month": "2009-06",
+      "passengers": 3419595
+    },
+    {
+      "month": "2009-07",
+      "passengers": 3649702
+    },
+    {
+      "month": "2009-08",
+      "passengers": 3650668
+    },
+    {
+      "month": "2009-09",
+      "passengers": 3191526
+    },
+    {
+      "month": "2009-10",
+      "passengers": 3249428
+    },
+    {
+      "month": "2009-11",
+      "passengers": 2971484
+    },
+    {
+      "month": "2009-12",
+      "passengers": 3074209
+    },
+    {
+      "month": "2010-01",
+      "passengers": 2785466
+    },
+    {
+      "month": "2010-02",
+      "passengers": 2515361
+    },
+    {
+      "month": "2010-03",
+      "passengers": 3105958
+    },
+    {
+      "month": "2010-04",
+      "passengers": 3139059
+    },
+    {
+      "month": "2010-05",
+      "passengers": 3380355
+    },
+    {
+      "month": "2010-06",
+      "passengers": 3612886
+    },
+    {
+      "month": "2010-07",
+      "passengers": 3765824
+    },
+    {
+      "month": "2010-08",
+      "passengers": 3771842
+    },
+    {
+      "month": "2010-09",
+      "passengers": 3356365
+    },
+    {
+      "month": "2010-10",
+      "passengers": 3490100
+    },
+    {
+      "month": "2010-11",
+      "passengers": 3163659
+    },
+    {
+      "month": "2010-12",
+      "passengers": 3167124
+    },
+    {
+      "month": "2011-01",
+      "passengers": 2883810
+    },
+    {
+      "month": "2011-02",
+      "passengers": 2610667
+    },
+    {
+      "month": "2011-03",
+      "passengers": 3129205
+    },
+    {
+      "month": "2011-04",
+      "passengers": 3200527
+    },
+    {
+      "month": "2011-05",
+      "passengers": 3547804
+    },
+    {
+      "month": "2011-06",
+      "passengers": 3766323
+    },
+    {
+      "month": "2011-07",
+      "passengers": 3935589
+    },
+    {
+      "month": "2011-08",
+      "passengers": 3917884
+    },
+    {
+      "month": "2011-09",
+      "passengers": 3564970
+    },
+    {
+      "month": "2011-10",
+      "passengers": 3602455
+    },
+    {
+      "month": "2011-11",
+      "passengers": 3326859
+    },
+    {
+      "month": "2011-12",
+      "passengers": 3441693
+    },
+    {
+      "month": "2012-01",
+      "passengers": 3211600
+    },
+    {
+      "month": "2012-02",
+      "passengers": 2998119
+    },
+    {
+      "month": "2012-03",
+      "passengers": 3472440
+    },
+    {
+      "month": "2012-04",
+      "passengers": 3563007
+    },
+    {
+      "month": "2012-05",
+      "passengers": 3820570
+    },
+    {
+      "month": "2012-06",
+      "passengers": 4107195
+    },
+    {
+      "month": "2012-07",
+      "passengers": 4284443
+    },
+    {
+      "month": "2012-08",
+      "passengers": 4356216
+    },
+    {
+      "month": "2012-09",
+      "passengers": 3819379
+    },
+    {
+      "month": "2012-10",
+      "passengers": 3844987
+    },
+    {
+      "month": "2012-11",
+      "passengers": 3478890
+    },
+    {
+      "month": "2012-12",
+      "passengers": 3443039
+    },
+    {
+      "month": "2013-01",
+      "passengers": 3204637
+    },
+    {
+      "month": "2013-02",
+      "passengers": 2966477
+    },
+    {
+      "month": "2013-03",
+      "passengers": 3593364
+    },
+    {
+      "month": "2013-04",
+      "passengers": 3604104
+    },
+    {
+      "month": "2013-05",
+      "passengers": 3933016
+    },
+    {
+      "month": "2013-06",
+      "passengers": 4146797
+    },
+    {
+      "month": "2013-07",
+      "passengers": 4176486
+    },
+    {
+      "month": "2013-08",
+      "passengers": 4347059
+    },
+    {
+      "month": "2013-09",
+      "passengers": 3781168
+    },
+    {
+      "month": "2013-10",
+      "passengers": 3910790
+    },
+    {
+      "month": "2013-11",
+      "passengers": 3466878
+    },
+    {
+      "month": "2013-12",
+      "passengers": 3814984
+    },
+    {
+      "month": "2014-01",
+      "passengers": 3432625
+    },
+    {
+      "month": "2014-02",
+      "passengers": 3078405
+    },
+    {
+      "month": "2014-03",
+      "passengers": 3765504
+    },
+    {
+      "month": "2014-04",
+      "passengers": 3881893
+    },
+    {
+      "month": "2014-05",
+      "passengers": 4147096
+    },
+    {
+      "month": "2014-06",
+      "passengers": 4321833
+    },
+    {
+      "month": "2014-07",
+      "passengers": 4499221
+    },
+    {
+      "month": "2014-08",
+      "passengers": 4524918
+    },
+    {
+      "month": "2014-09",
+      "passengers": 3919072
+    },
+    {
+      "month": "2014-10",
+      "passengers": 4059443
+    },
+    {
+      "month": "2014-11",
+      "passengers": 3628786
+    },
+    {
+      "month": "2014-12",
+      "passengers": 3855835
+    },
+    {
+      "month": "2015-01",
+      "passengers": 3550084
+    },
+    {
+      "month": "2015-02",
+      "passengers": 3248144
+    },
+    {
+      "month": "2015-03",
+      "passengers": 4001521
+    },
+    {
+      "month": "2015-04",
+      "passengers": 4021677
+    },
+    {
+      "month": "2015-05",
+      "passengers": 4361140
+    },
+    {
+      "month": "2015-06",
+      "passengers": 4558511
+    },
+    {
+      "month": "2015-07",
+      "passengers": 4801148
+    },
+    {
+      "month": "2015-08",
+      "passengers": 4796653
+    },
+    {
+      "month": "2015-09",
+      "passengers": 4201394
+    },
+    {
+      "month": "2015-10",
+      "passengers": 4374749
+    },
+    {
+      "month": "2015-11",
+      "passengers": 4013814
+    },
+    {
+      "month": "2015-12",
+      "passengers": 4129052
+    },
+    {
+      "month": "2016-01",
+      "passengers": 3748529
+    },
+    {
+      "month": "2016-02",
+      "passengers": 3543639
+    },
+    {
+      "month": "2016-03",
+      "passengers": 4137679
+    }
+  ],
+  "backtest": [
+    {
+      "month": "2014-04",
+      "actual": 3881893,
+      "lstm": 3801258,
+      "seasonal_naive": 3604104
+    },
+    {
+      "month": "2014-05",
+      "actual": 4147096,
+      "lstm": 4028749,
+      "seasonal_naive": 3933016
+    },
+    {
+      "month": "2014-06",
+      "actual": 4321833,
+      "lstm": 4219453,
+      "seasonal_naive": 4146797
+    },
+    {
+      "month": "2014-07",
+      "actual": 4499221,
+      "lstm": 4343570,
+      "seasonal_naive": 4176486
+    },
+    {
+      "month": "2014-08",
+      "actual": 4524918,
+      "lstm": 4303079,
+      "seasonal_naive": 4347059
+    },
+    {
+      "month": "2014-09",
+      "actual": 3919072,
+      "lstm": 4066049,
+      "seasonal_naive": 3781168
+    },
+    {
+      "month": "2014-10",
+      "actual": 4059443,
+      "lstm": 3925436,
+      "seasonal_naive": 3910790
+    },
+    {
+      "month": "2014-11",
+      "actual": 3628786,
+      "lstm": 3741741,
+      "seasonal_naive": 3466878
+    },
+    {
+      "month": "2014-12",
+      "actual": 3855835,
+      "lstm": 3582569,
+      "seasonal_naive": 3814984
+    },
+    {
+      "month": "2015-01",
+      "actual": 3550084,
+      "lstm": 3390277,
+      "seasonal_naive": 3432625
+    },
+    {
+      "month": "2015-02",
+      "actual": 3248144,
+      "lstm": 3521990,
+      "seasonal_naive": 3078405
+    },
+    {
+      "month": "2015-03",
+      "actual": 4001521,
+      "lstm": 3801874,
+      "seasonal_naive": 3765504
+    },
+    {
+      "month": "2015-04",
+      "actual": 4021677,
+      "lstm": 4023927,
+      "seasonal_naive": 3881893
+    },
+    {
+      "month": "2015-05",
+      "actual": 4361140,
+      "lstm": 4229963,
+      "seasonal_naive": 4147096
+    },
+    {
+      "month": "2015-06",
+      "actual": 4558511,
+      "lstm": 4420386,
+      "seasonal_naive": 4321833
+    },
+    {
+      "month": "2015-07",
+      "actual": 4801148,
+      "lstm": 4514307,
+      "seasonal_naive": 4499221
+    },
+    {
+      "month": "2015-08",
+      "actual": 4796653,
+      "lstm": 4413095,
+      "seasonal_naive": 4524918
+    },
+    {
+      "month": "2015-09",
+      "actual": 4201394,
+      "lstm": 4206118,
+      "seasonal_naive": 3919072
+    },
+    {
+      "month": "2015-10",
+      "actual": 4374749,
+      "lstm": 4060227,
+      "seasonal_naive": 4059443
+    },
+    {
+      "month": "2015-11",
+      "actual": 4013814,
+      "lstm": 3889213,
+      "seasonal_naive": 3628786
+    },
+    {
+      "month": "2015-12",
+      "actual": 4129052,
+      "lstm": 3751519,
+      "seasonal_naive": 3855835
+    },
+    {
+      "month": "2016-01",
+      "actual": 3748529,
+      "lstm": 3641103,
+      "seasonal_naive": 3550084
+    },
+    {
+      "month": "2016-02",
+      "actual": 3543639,
+      "lstm": 3726398,
+      "seasonal_naive": 3248144
+    },
+    {
+      "month": "2016-03",
+      "actual": 4137679,
+      "lstm": 3996824,
+      "seasonal_naive": 4001521
+    }
+  ],
+  "forecast": [
+    {
+      "month": "2016-04",
+      "passengers": 4203737
+    },
+    {
+      "month": "2016-05",
+      "passengers": 4417555
+    },
+    {
+      "month": "2016-06",
+      "passengers": 4575917
+    },
+    {
+      "month": "2016-07",
+      "passengers": 4625980
+    },
+    {
+      "month": "2016-08",
+      "passengers": 4527781
+    },
+    {
+      "month": "2016-09",
+      "passengers": 4315480
+    },
+    {
+      "month": "2016-10",
+      "passengers": 4179516
+    },
+    {
+      "month": "2016-11",
+      "passengers": 3996581
+    },
+    {
+      "month": "2016-12",
+      "passengers": 3866418
+    },
+    {
+      "month": "2017-01",
+      "passengers": 3755163
+    },
+    {
+      "month": "2017-02",
+      "passengers": 3895275
+    },
+    {
+      "month": "2017-03",
+      "passengers": 4140522
+    }
+  ],
+  "seasonal_index": {
+    "1": 0.8956,
+    "2": 0.8238,
+    "3": 0.9936,
+    "4": 0.9604,
+    "5": 1.0383,
+    "6": 1.0872,
+    "7": 1.1248,
+    "8": 1.1408,
+    "9": 0.9933,
+    "10": 1.0303,
+    "11": 0.9272,
+    "12": 0.9848
+  }
+}
