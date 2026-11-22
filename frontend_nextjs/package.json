@@ -1,0 +1,48 @@
+{
+  "name": "airport-digital-twin-dashboard",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "build:static": "cross-env NEXT_OUTPUT=export next build && node scripts/flatten-rsc.mjs out",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "postinstall": "patch-package"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
+    "clsx": "^2.1.0",
+    "framer-motion": "^14.14.0",
+    "lucide-react": "^1.77.0",
+    "next": "16.4.6",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "recharts": "^2.15.4",
+    "tailwind-merge": "^2.2.1",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.160.0",
+    "autoprefixer": "^10.7.0",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.6",
+    "patch-package": "^8.0.1",
+    "postcss": "^8.5.33",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.3.3",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1"
+  },
+  "description": "Next.js dashboard for the airport digital twin: Scenario Lab, 3D live twin, analytics and model cards.",
+  "engines": {
+    "node": ">=20.9"
+  }
+}
